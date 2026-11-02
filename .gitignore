@@ -1,0 +1,24 @@
+# --- Secrets: never commit ---
+.env
+.env.*
+!.env.example
+
+# --- Personal data: never commit ---
+config/criteria.md
+config/cv_base.md
+tests/fixtures/private/
+evals/golden_set/
+applications/
+# Original Spanish design notes with personal context (public version: docs/design.md)
+PROYECTO_ANALIZADOR_VACANTES.md
+
+# --- Python ---
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- Local data ---
+*.db
+*.db-wal
+*.db-shm
