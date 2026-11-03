@@ -1,0 +1,46 @@
+{
+    // Debug configurations: Run and Debug panel (Ctrl+Shift+D), pick one, press F5.
+    // justMyCode=true: F11 (step into) skips library code (anthropic, pydantic, argparse).
+    // Set it to false if you want to step inside a library.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "CLI: trim-only (no API)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "job_analyzer.analyze",
+            "args": ["tests/fixtures/synthetic_external.txt", "--trim-only"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Test: analyze() with FakeClient (no network, no cost)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": ["tests/test_analyze.py::test_call_uses_trimmed_text_cache_and_schema", "-q"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "CLI: full analysis (calls the Claude API, costs money)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "job_analyzer.analyze",
+            "args": ["${input:capture}"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ],
+    "inputs": [
+        {
+            "id": "capture",
+            "type": "promptString",
+            "description": "Path of the captured posting (.txt)",
+            "default": "tests/fixtures/synthetic_external.txt"
+        }
+    ]
+}
