@@ -58,6 +58,11 @@ def test_external_apply_variant():
     assert "Jane Doe" not in trimmed
 
 
+def test_fewer_than_3_applicants_variant():
+    text = "menu\nLinkedIn Corporation © 2026\nPOSTING\nOnce there are 3 or more applicants for this job, we will show how you compare to the competition.\nfooter"
+    assert trim_page(text) == "POSTING\n"
+
+
 def test_url_info_from_url_line():
     info = extract_url_info(read("synthetic_external.txt"))
     assert info.job_id == "4123456789"

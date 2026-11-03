@@ -186,7 +186,7 @@ on its own.
 
 | Function | Input | Output | What it does |
 |---|---|---|---|
-| `trim_page(text)` | raw text | trimmed text | Keeps what lies between `LinkedIn Corporation ©` and `See how you compare to`. If a marker is missing, it returns everything (fallback). |
+| `trim_page(text)` | raw text | trimmed text | Keeps what lies between `LinkedIn Corporation ©` and the first end marker found in `END_MARKERS` (one per LinkedIn layout). If a marker is missing, it returns everything (fallback). |
 | `extract_url_info(text)` | raw text | `UrlInfo` | Finds the `URL:` line added by F9 and extracts the job ID and the `keywords` parameter. |
 
 Python concepts used here: **regex** (`re.compile`, `.search`, `.group`), **immutable
@@ -341,7 +341,8 @@ with a function that fails the test if it is ever called.
 |---|---|---|---|
 | `"""text"""` at the top of a file/function | *docstring*: documentation Python stores in `__doc__` | top of every module | Doxygen comment |
 | `import x` / `from x import y` | loads a module (runs it once) | `from job_analyzer.trim import trim_page` | `#include` + linking |
-| `NAME = value` in upper case | constant by convention | `END_MARKER` | `#define` / `const` |
+| `NAME = value` in upper case | constant by convention | `START_MARKER` | `#define` / `const` |
+| `(a, b)` | *tuple*: a list that cannot be modified | `END_MARKERS` | `const` array |
 | `def f(x: str) -> int:` | function with *type hints* (Python does not enforce them; tools check them) | `def trim_page(text: str) -> str:` | `int f(char* x)` |
 | `x: str \| None` | either `str` or `None` | `job_id: str \| None` | pointer that may be `NULL` |
 | `def f(x, y=None)` | parameter with a default value | `analyze(text, model=MODEL, client=None)` | overloading |
@@ -355,6 +356,7 @@ with a function that fails the test if it is ever called.
 | `Literal["a","b"]` | only those values | `Signal` | `enum` |
 | `{key: value}` / `.items()` | dictionary and its pairs | `_DAYS_PER_UNIT` | lookup table |
 | `for k, v in d.items():` | iterates pairs and *unpacks* them | `days_since_posted()` | `for` over an array of structs |
+| `for …:` + `break` | leaves the loop as soon as something is found | `trim_page()` | `break` |
 | `x in some_list` | membership test | `"top_applicant" in p.linkedin_signals` | linear search |
 | `1 <= v <= 5` | chained comparison | `validate_posting()` | `1 <= v && v <= 5` |
 | `raise E(...)` / `try: … except E:` | throw / catch errors | `AnalysisError` | error return codes |
@@ -381,9 +383,9 @@ From easiest to hardest. Run `uv run pytest` after each change.
    `trim_page()` in `trim.py` and choose **Debug Test**. Step with `F10` and watch `start` and
    `end` in the variables panel. It is the best way to see "who calls whom".
 
-3. **Break a test on purpose.** In `trim.py`, change `END_MARKER` to the long version
-   `"See how you compare to other applicants"`. Which tests fail and why? (It is the real bug
-   found with 2 of the 4 real captures.) Put it back afterwards.
+3. **Break a test on purpose.** In `trim.py`, change the first item of `END_MARKERS` to the long
+   version `"See how you compare to other applicants"`. Which tests fail and why? (It is the real
+   bug found with 2 of the 4 first real captures.) Put it back afterwards.
 
 4. **A coverage question.** Change `0.5` to `0.6` in `fit()`. Does any test fail? What does
    that say about what the tests cover? Write a test that catches it.

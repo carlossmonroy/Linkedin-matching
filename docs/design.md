@@ -232,8 +232,12 @@ company insights, footer). The open posting always sits between two markers. See
 - **The end marker has variants** depending on the posting type (finding from real data):
   - Easy Apply: `See how you compare to other applicants`
   - External apply ("Responses managed off LinkedIn"): `See how you compare to others who clicked apply`
-  - Hence the common prefix `See how you compare to`. With the long marker, 2 of 4 real captures failed.
-- On the four real samples it kept only **31–41%** of the text (~2/3 fewer tokens).
+  - Fewer than 3 applicants: LinkedIn has no comparison yet and shows
+    `Once there are 3 or more applicants for this job, we will show how you compare to the competition.`
+  - `trim.py` keeps them in a table (`END_MARKERS`) and cuts at the first one it finds. A shorter
+    common substring (`how you compare to`) was rejected: it leaves `See ` at the end of every
+    posting and, being a common phrase, raises the risk of a silent cut inside a description.
+- On the real samples it kept only **29–49%** of the text (about 2/3 fewer tokens).
 - It also removes the signed-in user's name, which appears at the bottom of the page.
 - The markers depend on the LinkedIn UI language (English). The fallback (return the full text)
   guarantees it does not break.

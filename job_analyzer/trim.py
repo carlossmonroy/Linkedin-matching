@@ -11,8 +11,11 @@ from urllib.parse import parse_qs, urlparse  # split a URL into host, path and q
 # Module-level constants. UPPER_CASE by convention (PEP 8): Python does not prevent
 # reassigning them, but the name signals that nobody should.
 START_MARKER = "LinkedIn Corporation ©"
-# Common prefix of "...other applicants" (Easy Apply) and "...others who clicked apply" (external apply).
-END_MARKER = "See how you compare to"
+# Each LinkedIn layout ends the posting with a different text. The first one found wins.
+END_MARKERS = (
+    "See how you compare to",               # 3+ applicants (Easy Apply and external apply)
+    "Once there are 3 or more applicants",  # fewer than 3 applicants: no comparison yet
+)
 
 # re.compile() parses the pattern once, at import time, and it is reused on every call.
 # r"..." is a *raw string*: backslashes reach the regex as-is instead of being treated
@@ -39,7 +42,11 @@ def trim_page(text: str) -> str:
     """Keep only the open job posting. If a marker is missing, return the full text."""
     # str.find() returns the index of the first occurrence, or -1 if not found.
     start = text.find(START_MARKER)
-    end = text.find(END_MARKER)
+    end = -1
+    for marker in END_MARKERS:
+        end = text.find(marker)
+        if end != -1:
+            break
     # Fallback: if LinkedIn changes its layout or UI language, sending everything
     # (more tokens) is better than losing the posting.
     if start == -1 or end == -1 or end < start:
