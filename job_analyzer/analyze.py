@@ -52,8 +52,6 @@ Scores (1–5) based on the candidate profile:
 They are different questions: a generic software role can have a good technical match and low \
 domain similarity.
 
-# Candidate profile and criteria
-
 """
 
 
@@ -129,6 +127,7 @@ def main(argv: list[str] | None = None) -> int:
     trimmed = trim_page(text)
 
     print(f"job_id: {info.job_id}  search: {info.search_query}")
+    print(f"URL: {info.url}")
     # {value:.0%} is a format spec: multiply by 100 and show 0 decimals with a % sign.
     print(f"trimmed: {len(trimmed)}/{len(text)} characters ({len(trimmed) / max(len(text), 1):.0%})")
     if args.trim_only:

@@ -75,7 +75,9 @@ CAPTURE = str(Path(__file__).parent / "fixtures" / "synthetic_external.txt")
 
 def test_main_trim_only_never_calls_the_api(capsys):
     assert mod.main([CAPTURE, "--trim-only"]) == 0
-    assert "job_id: 4123456789" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "job_id: 4123456789" in out
+    assert "URL: https://www.linkedin.com/jobs/view/4123456789/" in out
 
 
 def test_main_without_api_key_fails_before_calling_the_api(monkeypatch, capsys, tmp_path):
