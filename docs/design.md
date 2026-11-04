@@ -264,6 +264,12 @@ round. Example: "Automation Tester Mid." (Querétaro) scores high on both (HIL, 
 CI/CD) → priority candidate. The signal to watch there is seniority (mid, 70% entry-level
 applicants), because of a possible salary mismatch.
 
+**Per-requirement assessment:** `requirements` lists each skill, tool, experience or education
+requirement with its `importance` (required or preferred), `status` (met, partial or missing)
+and `evidence` from the candidate profile, so a score can be checked line by line. A Python cap
+on `technical_match` was tried on 14 real postings and not adopted: the score already follows
+the share of gaps, and a rule based on counts would have changed up to 6 of the 14 scores.
+
 **Ranking (priority):** computed in Python, not by the LLM, so it is transparent and tunable.
 Three axes computed separately (see 5.4) and shown as separate dashboard columns. See
 `job_analyzer/ranking.py`:

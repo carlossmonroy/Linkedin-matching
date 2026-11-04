@@ -55,7 +55,7 @@ def posting(**changes) -> JobPosting:
         company="ALTEN", title="Automation Tester Mid.", location="Querétaro, Mexico",
         city="Querétaro", country="mexico", work_mode="hybrid", visa="not_applicable",
         clearance_itar=False, local_candidates_only=False, language_requirement="not_mentioned", seniority="mid",
-        years_experience=3, hard_requirements=[], tech_stack=["HIL", "BDD"],
+        years_experience=3, requirements=[], tech_stack=["HIL", "BDD"],
         application_type="easy_apply", applicants=43, posted_ago="2 days ago",
         linkedin_signals=[], technical_match=4, domain_similarity=5, rationale="",
     )

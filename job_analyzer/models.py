@@ -32,6 +32,14 @@ Status = Literal[
 ]
 
 
+class Requirement(BaseModel):
+    """A single requirement from the posting, e.g. 'Python' or 'Bachelor's degree'."""
+    text: str
+    importance: Literal["required", "preferred"] = Field(description="required: the posting demands it (required, basic or minimum qualifications). preferred: anything optional (preferred, nice to have, a plus)")
+    status: Literal["met", "partial", "missing"] = Field(description="met: direct documented experience. partial: minimal or transferable experience. missing: nothing documented or transferable")
+    evidence: str | None = Field(description="Brief evidence from the candidate profile; null if status is missing")
+
+
 # Inheriting from BaseModel gives the class validation, model_dump_json(), etc.
 # Every attribute with a type annotation (`name: type`) becomes a required field.
 class JobPosting(BaseModel):
@@ -49,7 +57,7 @@ class JobPosting(BaseModel):
     language_requirement: str = Field(description="Required language and level, e.g. 'English B2', or 'not_mentioned'")
     seniority: Literal["entry", "mid", "senior", "lead", "not_mentioned"]
     years_experience: int | None
-    hard_requirements: list[str]                  # list[str] = a list of strings
+    requirements: list[Requirement] = Field(description="One item per skill, tool, experience or education requirement in the posting. Exclude location, visa, clearance and language: they have their own fields")
     tech_stack: list[str]
     application_type: Literal["easy_apply", "external", "not_mentioned"]
     applicants: int | None = Field(description="'43 applicants' or '42 people clicked apply' → 43 / 42")
