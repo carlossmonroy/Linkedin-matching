@@ -227,7 +227,7 @@ JOB_ID_RE.search(...).group(1)  →  "4123456789"   (group 1 = what is inside th
 | Function | What it does |
 |---|---|
 | `validate_posting(p)` | Raises `InvalidPosting` if a score is outside 1–5. Needed because the API does not support `minimum`/`maximum` in the schema. |
-| `initial_status(p)` | `"discarded"` if it requires clearance/ITAR or citizenship; otherwise `"to_review"`. `"no_sponsorship"` does **not** discard (TN option). |
+| `initial_status(p)` | `"discarded"` if it requires clearance/ITAR or citizenship, or if it only accepts local candidates outside Mexico; otherwise `"to_review"`. `"no_sponsorship"` does **not** discard (TN option). |
 
 ### 6.4 `ranking.py` — priority
 

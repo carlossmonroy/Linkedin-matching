@@ -41,10 +41,11 @@ class JobPosting(BaseModel):
     # JSON Schema and Claude reads it as an instruction for that field.
     location: str = Field(description="Location text exactly as it appears in the posting")
     city: str | None = Field(description="City name only, without state or country")
-    country: Literal["mexico", "usa", "other", "not_mentioned"]
+    country: Literal["mexico", "usa", "other", "not_mentioned", "germany", "canada", "switzerland"]
     work_mode: Literal["onsite", "hybrid", "remote", "not_mentioned"]
     visa: Literal["sponsors", "no_sponsorship", "citizenship_required", "not_mentioned", "not_applicable"]
     clearance_itar: bool = Field(description="Requires a security clearance, ITAR, EAR or 'US person' status")
+    local_candidates_only: bool = Field(description="True if the posting rejects candidates who would need to relocate")
     language_requirement: str = Field(description="Required language and level, e.g. 'English B2', or 'not_mentioned'")
     seniority: Literal["entry", "mid", "senior", "lead", "not_mentioned"]
     years_experience: int | None

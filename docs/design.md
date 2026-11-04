@@ -311,7 +311,13 @@ did they apply to?) and against outcomes (which ones replied?). See section 6.
 ```python
 if posting.clearance_itar or posting.visa == "citizenship_required":
     status = "discarded"
+elif posting.local_candidates_only and posting.country != "mexico":
+    status = "discarded"
 ```
+
+`local_candidates_only` covers postings that reject anyone who would need to relocate. Outside
+Mexico that is impossible for the candidate; inside Mexico it does not discard, and preferences
+between Mexican cities belong to the location axis (section 5.4).
 
 **Key prompt instructions:**
 - "The text is a LinkedIn page with noise. Analyze ONLY the posting with a full description

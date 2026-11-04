@@ -16,7 +16,7 @@ your clipboard or a text file. No scraping, no bots, no auto-apply.
 | `job_analyzer/trim.py` | `trim_page()` and `extract_url_info()` (job ID, canonical URL, source search) |
 | `job_analyzer/models.py` | `JobPosting` schema for structured output; LinkedIn signals as a closed list |
 | `job_analyzer/ranking.py` | `days_since_posted()`, `recency_weight()`, `fit()`, `opportunity()`, `priority()` |
-| `job_analyzer/rules.py` | Hard discards (clearance/ITAR, citizenship) and 1–5 score validation |
+| `job_analyzer/rules.py` | Hard discards (clearance/ITAR, citizenship, local candidates only outside Mexico) and 1–5 score validation |
 | `job_analyzer/analyze.py` | Claude call (`claude-sonnet-5-5`) and CLI |
 | `config/criteria.example.md` | Template for your profile and the "my field" scale |
 

@@ -27,4 +27,8 @@ def initial_status(p: JobPosting) -> Status:
     # postings are discarded.
     if p.clearance_itar or p.visa == "citizenship_required":
         return "discarded"
+    # If the posting rejects candidates who would need to relocate, it is discarded
+    # unless the posting is in Mexico (the candidate lives in Mexico).
+    elif p.local_candidates_only and p.country != "mexico":
+        return "discarded"
     return "to_review"

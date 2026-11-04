@@ -54,7 +54,7 @@ def posting(**changes) -> JobPosting:
     base = dict(
         company="ALTEN", title="Automation Tester Mid.", location="Querétaro, Mexico",
         city="Querétaro", country="mexico", work_mode="hybrid", visa="not_applicable",
-        clearance_itar=False, language_requirement="not_mentioned", seniority="mid",
+        clearance_itar=False, local_candidates_only=False, language_requirement="not_mentioned", seniority="mid",
         years_experience=3, hard_requirements=[], tech_stack=["HIL", "BDD"],
         application_type="easy_apply", applicants=43, posted_ago="2 days ago",
         linkedin_signals=[], technical_match=4, domain_similarity=5, rationale="",
@@ -79,6 +79,9 @@ def test_priority_location_centered_on_3():
     ({"clearance_itar": True}, "discarded"),
     ({"visa": "citizenship_required"}, "discarded"),
     ({"visa": "no_sponsorship"}, "to_review"),   # not discarded: a TN visa may apply
+    ({"local_candidates_only": True, "country": "usa"}, "discarded"),
+    ({"local_candidates_only": True, "country": "mexico"}, "to_review"),
+    ({"local_candidates_only": False, "country": "usa"}, "to_review"),
 ])
 def test_initial_status(changes, status):
     assert initial_status(posting(**changes)) == status
