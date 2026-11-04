@@ -96,6 +96,30 @@ def test_main_without_criteria_fails(monkeypatch, capsys, tmp_path):
     assert "criteria.md not found" in capsys.readouterr().err
 
 
+def test_salary_floors_are_empty_without_the_file(tmp_path):
+    assert mod.load_salary_floors(tmp_path / "salary_floors.toml") == {}
+
+
+def test_salary_floors_load_from_toml(tmp_path):
+    path = tmp_path / "salary_floors.toml"
+    path.write_text("[USD]\nyear = 1000\n", encoding="utf-8")
+    assert mod.load_salary_floors(path) == {"USD": {"year": 1000}}
+
+
+def test_salary_floors_example_is_valid():
+    assert "USD" in mod.load_salary_floors(mod.SALARY_FLOORS.with_name("salary_floors.example.toml"))
+
+
+def test_main_with_invalid_floors_fails_before_calling_the_api(monkeypatch, capsys, tmp_path):
+    path = tmp_path / "salary_floors.toml"
+    path.write_text("this is not toml", encoding="utf-8")
+    monkeypatch.setattr(mod, "SALARY_FLOORS", path)
+    monkeypatch.setattr(mod, "CRITERIA", mod.CRITERIA_EXAMPLE)
+    monkeypatch.setattr(mod, "analyze", lambda *a, **k: pytest.fail("analyze() must not be called"))
+    assert mod.main([CAPTURE]) == 1
+    assert "salary_floors.toml is not valid TOML" in capsys.readouterr().err
+
+
 def test_top_applicant_is_added_when_claude_misses_it():
     text = "menu\nLinkedIn Corporation © 2026\nYou’d be a top applicant\nSee how you compare to x\nfooter"
     resp = SimpleNamespace(stop_reason="end_turn", parsed_output=posting(linkedin_signals=[]))

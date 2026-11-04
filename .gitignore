@@ -6,6 +6,7 @@
 # --- Personal data: never commit ---
 config/criteria.md
 config/cv_base.md
+config/salary_floors.toml
 tests/fixtures/private/
 evals/golden_set/
 applications/

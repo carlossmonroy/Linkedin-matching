@@ -278,6 +278,7 @@ Three axes computed separately (see 5.4) and shown as separate dashboard columns
 
 ```python
 W_LOCATION = 0.3   # tunable
+W_LOW_SALARY = -1.0
 
 def fit(p): return 0.5 * p.domain_similarity + 0.4 * p.technical_match
 
@@ -287,10 +288,12 @@ def opportunity(p, days):
     if "actively_reviewing" in p.linkedin_signals: score += 0.2
     return score
 
-def priority(p, days, location=None):
+def priority(p, days, location=None, floors=None):
     score = fit(p) + opportunity(p, days)
     if location is not None:                  # remote or no data → neutral
         score += W_LOCATION * (location - 3)  # centered on 3
+    if below_salary_floor(p, floors or {}):
+        score += W_LOW_SALARY
     return score
 ```
 
@@ -298,8 +301,18 @@ def priority(p, days, location=None):
   free text returned by the LLM.
 - `top_applicant` adds only 0.2: it repeats LinkedIn's own matching, and all 14 postings of the
   second evaluation had it. Claude missed it once on a real capture, so Python also looks for it
-  in the trimmed text with a plain search and adds it if missing. "Job match is high" counts as well: it is assumed to be correlated, based on a single
-  capture so far, and it is easy to remove if the data says otherwise.
+  in the trimmed text with a plain search and adds it if missing. "Job match is high" counts as
+  well: it is assumed to be correlated, based on a single capture so far, and it is easy to remove
+  if the data says otherwise.
+- **Salary:** Claude extracts the posted range and Python compares its top against a floor per
+  currency and period, read from `config/salary_floors.toml`. That file is private, so the code
+  and the public tests never hold real amounts. Without a floor or a posted salary nothing
+  changes. A low salary lowers the priority instead of discarding: it is not impossible.
+- **Run-to-run variation:** the same 14 postings were analyzed 10 times with the same prompt.
+  The status never changed and the extracted data differed in a single value. Each score moved
+  1 point at most (`technical_match` in 4 postings, `domain_similarity` in 8), and the priority
+  moved 0.4 on average and 0.9 at most. So a priority gap under 0.5 is a tie, and
+  `W_LOW_SALARY` is larger than that noise.
 
 **Posting age:** newer weighs more. Applying in the first days makes it likelier that a human
 reads the CV.
@@ -544,6 +557,7 @@ Pricing: https://platform.claude.com/docs/en/about-claude/pricing
 ├── .env.example
 ├── config/
 │   ├── criteria.example.md   # template; criteria.md (private) holds the real profile
+│   ├── salary_floors.example.toml   # template; salary_floors.toml (private) holds the real floors
 │   ├── cities.yaml           # work/living areas: safety, walkability, commute
 │   └── cv_base.md            # private (git-ignored)
 ├── job_analyzer/

@@ -16,6 +16,7 @@ IGNORED = {
     ".env",                      # API key
     "config/criteria.md",        # personal profile
     "config/cv_base.md",         # CV
+    "config/salary_floors.toml", # personal salary floors
     "tests/fixtures/private/",   # real LinkedIn captures
     "evals/golden_set/",         # real labeled postings
     "applications/",             # generated CVs and cover letters

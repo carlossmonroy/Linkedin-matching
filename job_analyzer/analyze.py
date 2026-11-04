@@ -9,10 +9,11 @@ block at the bottom of this file, which calls main().
 import argparse                # reads command-line arguments
 import os
 import sys
+import tomllib                 # reads .toml configuration files (standard library)
 from pathlib import Path       # file paths as objects (same code on Windows and Linux)
 
 from job_analyzer.models import JobPosting
-from job_analyzer.ranking import days_since_posted, priority
+from job_analyzer.ranking import below_salary_floor, days_since_posted, priority
 from job_analyzer.rules import InvalidPosting, initial_status, validate_posting
 from job_analyzer.trim import extract_url_info, is_top_applicant, trim_page
 
@@ -23,6 +24,8 @@ ROOT = Path(__file__).resolve().parent.parent
 # Your real profile. It is listed in .gitignore: it holds personal data and never goes to GitHub.
 CRITERIA = ROOT / "config" / "criteria.md"          # the / operator joins paths in pathlib
 CRITERIA_EXAMPLE = ROOT / "config" / "criteria.example.md"
+# Your salary floors. Also in .gitignore: never write them in the code or in public tests.
+SALARY_FLOORS = ROOT / "config" / "salary_floors.toml"
 # Holds ANTHROPIC_API_KEY. Also in .gitignore.
 ENV_FILE = ROOT / ".env"
 
@@ -62,6 +65,13 @@ class AnalysisError(RuntimeError):
 def system_prompt(criteria_path: Path = CRITERIA) -> str:
     # Fixed instructions + your profile = the "system prompt".
     return INSTRUCTIONS + criteria_path.read_text(encoding="utf-8")
+
+
+def load_salary_floors(path: Path) -> dict[str, dict[str, float]]:
+    # The file is optional: without it, no salary is checked.
+    if not path.exists():
+        return {}
+    return tomllib.loads(path.read_text(encoding="utf-8"))
 
 
 # `client=None` lets callers *inject* another client. In production the real one is
@@ -143,6 +153,11 @@ def main(argv: list[str] | None = None) -> int:
     if not CRITERIA.exists():
         return _error(f"config/{CRITERIA.name} not found. Copy config/{CRITERIA_EXAMPLE.name} and fill it in.")
 
+    try:
+        floors = load_salary_floors(SALARY_FLOORS)
+    except tomllib.TOMLDecodeError as e:          # a typo must stop here, before paying for the call
+        return _error(f"config/{SALARY_FLOORS.name} is not valid TOML: {e}")
+
     # Load the key from .env into THIS process's environment only. It is never set as a
     # Windows-wide variable (Claude Code would then bill as API instead of your subscription)
     # and it is never printed.
@@ -170,7 +185,9 @@ def main(argv: list[str] | None = None) -> int:
     # 5. Rules and ranking in Python.
     days = days_since_posted(posting.posted_ago)
     print(posting.model_dump_json(indent=2))         # Pydantic → indented JSON
-    print(f"status: {initial_status(posting)}  days since posted: {days}  priority: {priority(posting, days):.2f}")
+    print(f"status: {initial_status(posting)}  days since posted: {days}  priority: {priority(posting, days, floors=floors):.2f}")
+    if below_salary_floor(posting, floors):
+        print("salary below your floor: priority lowered")
     return 0
 
 

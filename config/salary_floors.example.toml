@@ -1,0 +1,11 @@
+# Copy this file to config/salary_floors.toml (git-ignored) and write your own values.
+# A posting whose top salary is below the floor loses priority.
+# Format: [currency], then period = amount. Periods: year, month, hour.
+# A currency or period with no floor here is not checked.
+
+[USD]
+year = 100000
+hour = 50
+
+[MXN]
+month = 50000

@@ -1,7 +1,7 @@
 import pytest
 
 from job_analyzer.models import JobPosting
-from job_analyzer.ranking import days_since_posted, opportunity, priority, recency_weight
+from job_analyzer.ranking import days_since_posted, opportunity, priority, recency_weight, below_salary_floor
 from job_analyzer.rules import InvalidPosting, initial_status, validate_posting
 
 
@@ -96,3 +96,34 @@ def test_validate_posting_out_of_range(field, value):
     # `with pytest.raises(X):` the test passes only if the block raises X.
     with pytest.raises(InvalidPosting):
         validate_posting(posting(**{field: value}))
+
+
+FLOORS= {"USD":{"year": 1000, "hour": 10},
+         "MXN":{"month": 5000}}
+
+@pytest.mark.parametrize("salary_max, currency, period, expected", [
+    (999, "USD", "year", True),
+    (1000, "USD", "year", False),    # equal to the floor is not below it
+    (None, None, None, False),       # no salary in the posting
+    (9, "USD", "hour", True),
+    (11, "USD", "hour", False),
+    (499, "MXN", "month", True),
+    (5001, "MXN", "month", False),
+    (50, "CAD", "year", False),      # no floor for that currency
+    (50, "USD", "month", False),     # no floor for that period
+])
+def test_below_salary_floor(salary_max, currency, period, expected):
+    p = posting(salary_max=salary_max, salary_currency=currency, salary_period=period)
+    assert below_salary_floor(p, FLOORS) is expected
+
+
+def test_priority_penalizes_low_salary():
+    p = posting(salary_max=999, salary_currency="USD", salary_period="year")
+    # The posting is below the floor, so it is penalized. The penalty is not huge: the
+    # candidate may still apply if the company is flexible.
+    assert priority(p, None, floors=FLOORS) == pytest.approx(priority(p, None) - 1.0)
+
+
+def test_priority_ignores_salary_at_the_floor():
+    p = posting(salary_max=1000, salary_currency="USD", salary_period="year")
+    assert priority(p, None, floors=FLOORS) == pytest.approx(priority(p, None))

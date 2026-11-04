@@ -14,7 +14,9 @@ Claude-Linkedin-Ranking/
 ├── .env.example                ← template for the API key (.env itself is git-ignored)
 ├── config/
 │   ├── criteria.example.md     ← public template of the candidate profile
-│   └── criteria.md             ← YOUR profile (git-ignored): goes into every prompt
+│   ├── criteria.md             ← YOUR profile (git-ignored): goes into every prompt
+│   ├── salary_floors.example.toml ← public template of the salary floors
+│   └── salary_floors.toml      ← YOUR floors (git-ignored, optional)
 ├── job_analyzer/               ← the package: all the logic
 │   ├── __init__.py             ← turns the folder into an importable package
 │   ├── analyze.py              ← ENTRY POINT (main) + Claude call
@@ -144,6 +146,7 @@ main()                                      analyze.py
 ├── trim_page(text)                         trim.py     ← only to print the trim %
 ├── [if --trim-only] print(...) → return 0
 ├── CRITERIA.exists()                       fails early if config/criteria.md is missing
+├── load_salary_floors(SALARY_FLOORS)       optional file; fails early if it is not valid TOML
 ├── load_dotenv(ENV_FILE)                   python-dotenv: loads ANTHROPIC_API_KEY from .env
 ├── os.environ.get("ANTHROPIC_API_KEY")     fails early if the key is missing (never prints it)
 ├── analyze(text)                           analyze.py
@@ -154,9 +157,10 @@ main()                                      analyze.py
 │   └── validate_posting(posting)           rules.py
 ├── days_since_posted(posting.posted_ago)   ranking.py
 ├── initial_status(posting)                 rules.py
-└── priority(posting, days)                 ranking.py
+└── priority(posting, days, floors=floors)  ranking.py
     ├── fit(posting)
-    └── opportunity(posting, days)
+    ├── opportunity(posting, days)
+    └── below_salary_floor(posting, floors)
         └── recency_weight(days)
 ```
 
@@ -238,6 +242,8 @@ priority = fit                                + opportunity                     
            + 0.4·technical_match
            range 0.9 … 4.5                     range −0.4 … 0.9                   ±0.6 (phase 4)
 ```
+
+If the top of the posted salary is below your floor, `priority()` also subtracts 1.0.
 
 **Worked example.** A posting with `domain_similarity=5`, `technical_match=4`, posted 2 days
 ago, with "Actively reviewing applicants":

@@ -2,6 +2,7 @@
 
 priority = fit (is this job for me?) + opportunity (do I have a real chance now?)
            + location adjustment (do I want to live there?)
+           + salary penalty (does it pay below my floor?)
 """
 
 import re
@@ -9,6 +10,7 @@ import re
 from job_analyzer.models import JobPosting
 
 W_LOCATION = 0.3   # weight of the location axis; tuned with data (section 6 of the design doc)
+W_LOW_SALARY = -1.0  # penalty below the salary floor; larger than the run-to-run noise measured (0.9)
 
 # Dictionary {unit prefix: days per unit}. The Spanish words are data, not names:
 # postings in Spanish say "hace 3 días".
@@ -90,8 +92,18 @@ def opportunity(p: JobPosting, days: int | None) -> float:
 
 
 # `location: float | None = None` is a parameter with a default value: it can be omitted.
-def priority(p: JobPosting, days: int | None, location: float | None = None) -> float:
+def priority(p: JobPosting, days: int | None, location: float | None = None, floors: dict[str, dict[str, float]] | None = None) -> float:
     score = fit(p) + opportunity(p, days)
     if location is not None:                  # remote or no data → neutral
         score += W_LOCATION * (location - 3)  # centered on 3: a good city adds, a bad one subtracts
+    if below_salary_floor(p, floors or {}):   # `floors or {}`: no floors → an empty dictionary
+        score += W_LOW_SALARY
     return score
+
+
+def below_salary_floor(p: JobPosting, floors: dict[str, dict[str, float]]) -> bool:
+    """True if the posting's salary is below the candidate's minimum."""
+    floor = floors.get(p.salary_currency, {}).get(p.salary_period)
+    if floor is None or p.salary_max is None:
+        return False
+    return p.salary_max < floor
