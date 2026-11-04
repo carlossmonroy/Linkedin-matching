@@ -80,10 +80,10 @@ def fit(p: JobPosting) -> float:
 
 
 def opportunity(p: JobPosting, days: int | None) -> float:
-    # Range: -0.4 (old, no signals) to 1.2 (recent + top applicant + actively reviewing).
+    # Range: -0.4 (old, no signals) to 0.9 (recent + top applicant + actively reviewing).
     score = recency_weight(days)
     if "top_applicant" in p.linkedin_signals:      # `in` checks whether the list contains the item
-        score += 0.5
+        score += 0.2
     if "actively_reviewing" in p.linkedin_signals:
         score += 0.2
     return score

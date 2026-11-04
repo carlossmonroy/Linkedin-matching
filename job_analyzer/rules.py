@@ -23,12 +23,15 @@ def validate_posting(p: JobPosting) -> None:
 
 
 def initial_status(p: JobPosting) -> Status:
-    # "no_sponsorship" does NOT discard: a TN visa may still apply. Only impossible
-    # postings are discarded.
+    # Only impossible postings are discarded.
     if p.clearance_itar or p.visa == "citizenship_required":
         return "discarded"
     # If the posting rejects candidates who would need to relocate, it is discarded
     # unless the posting is in Mexico (the candidate lives in Mexico).
     elif p.local_candidates_only and p.country != "mexico":
+        return "discarded"
+    # A TN visa also needs the employer's support letter, so "no sponsorship" counts as
+    # impossible too, except in Mexico, where the candidate needs no sponsor.
+    elif p.visa == "no_sponsorship" and p.country != "mexico":
         return "discarded"
     return "to_review"

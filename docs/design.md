@@ -40,9 +40,11 @@ The tool does **not** replace LinkedIn's discovery: it uses it as the **first fi
 
 ### Context
 
-- Supports searches in Mexico and the US. For US roles the visa matters: **"no sponsorship" is
-  not an automatic discard**. Three levels: `sponsors` / `no_sponsorship` (a TN visa may apply)
-  / `citizenship_required` (real discard). Immigration questions should be confirmed with a lawyer.
+- Supports searches in Mexico and the US. For US roles the visa matters. Three levels:
+  `sponsors` / `no_sponsorship` / `citizenship_required`. **"No sponsorship" is discarded outside
+  Mexico**: a TN visa needs no petition, but it does need a support letter from the employer, and
+  a company's "no sponsorship" policy may cover it. Immigration questions should be confirmed with
+  a lawyer.
 - Reading every posting is the bottleneck this tool removes.
 - Environment: **native Windows** (PowerShell), Git and GitHub.
   - Decision: no WSL. The clipboard lives in Windows, and WSL would split the project in two
@@ -281,7 +283,7 @@ def fit(p): return 0.5 * p.domain_similarity + 0.4 * p.technical_match
 
 def opportunity(p, days):
     score = recency_weight(days)
-    if "top_applicant" in p.linkedin_signals: score += 0.5
+    if "top_applicant" in p.linkedin_signals: score += 0.2
     if "actively_reviewing" in p.linkedin_signals: score += 0.2
     return score
 
@@ -294,9 +296,9 @@ def priority(p, days, location=None):
 
 - LinkedIn signals are a closed list (`Signal` literal), so the ranking never compares against
   free text returned by the LLM.
-- `top_applicant` weighs more than one point of `technical_match`, and Claude missed it once on a
-  real capture. Python also looks for it in the trimmed text with a plain search and adds it if
-  missing. "Job match is high" counts as well: it is assumed to be correlated, based on a single
+- `top_applicant` adds only 0.2: it repeats LinkedIn's own matching, and all 14 postings of the
+  second evaluation had it. Claude missed it once on a real capture, so Python also looks for it
+  in the trimmed text with a plain search and adds it if missing. "Job match is high" counts as well: it is assumed to be correlated, based on a single
   capture so far, and it is easy to remove if the data says otherwise.
 
 **Posting age:** newer weighs more. Applying in the first days makes it likelier that a human
@@ -324,11 +326,14 @@ if posting.clearance_itar or posting.visa == "citizenship_required":
     status = "discarded"
 elif posting.local_candidates_only and posting.country != "mexico":
     status = "discarded"
+elif posting.visa == "no_sponsorship" and posting.country != "mexico":
+    status = "discarded"
 ```
 
 `local_candidates_only` covers postings that reject anyone who would need to relocate. Outside
 Mexico that is impossible for the candidate; inside Mexico it does not discard, and preferences
-between Mexican cities belong to the location axis (section 5.4).
+between Mexican cities belong to the location axis (section 5.4). `no_sponsorship` has the same
+exception: the candidate needs no sponsor to work in Mexico.
 
 **Key prompt instructions:**
 - "The text is a LinkedIn page with noise. Analyze ONLY the posting with a full description

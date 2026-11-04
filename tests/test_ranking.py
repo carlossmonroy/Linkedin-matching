@@ -55,7 +55,8 @@ def posting(**changes) -> JobPosting:
         company="ALTEN", title="Automation Tester Mid.", location="Querétaro, Mexico",
         city="Querétaro", country="mexico", work_mode="hybrid", visa="not_applicable",
         clearance_itar=False, local_candidates_only=False, language_requirement="not_mentioned", seniority="mid",
-        years_experience=3, requirements=[], tech_stack=["HIL", "BDD"],
+        years_experience=3, salary_min=None, salary_max=None, salary_currency=None, salary_period=None,
+        requirements=[], tech_stack=["HIL", "BDD"],
         application_type="easy_apply", applicants=43, posted_ago="2 days ago",
         linkedin_signals=[], technical_match=4, domain_similarity=5, rationale="",
     )
@@ -65,7 +66,7 @@ def posting(**changes) -> JobPosting:
 def test_opportunity_adds_signals():
     p = posting(linkedin_signals=["top_applicant", "actively_reviewing"])
     # pytest.approx compares floats with a tolerance: 0.1 + 0.2 != 0.3 exactly in binary.
-    assert opportunity(p, 2) == pytest.approx(0.5 + 0.5 + 0.2)
+    assert opportunity(p, 2) == pytest.approx(0.5 + 0.2 + 0.2)
 
 
 def test_priority_location_centered_on_3():
@@ -78,7 +79,8 @@ def test_priority_location_centered_on_3():
     ({}, "to_review"),
     ({"clearance_itar": True}, "discarded"),
     ({"visa": "citizenship_required"}, "discarded"),
-    ({"visa": "no_sponsorship"}, "to_review"),   # not discarded: a TN visa may apply
+    ({"visa": "no_sponsorship", "country": "mexico"}, "to_review"),   # no sponsor needed in Mexico
+    ({"visa": "no_sponsorship", "country": "usa"}, "discarded"),
     ({"local_candidates_only": True, "country": "usa"}, "discarded"),
     ({"local_candidates_only": True, "country": "mexico"}, "to_review"),
     ({"local_candidates_only": False, "country": "usa"}, "to_review"),
