@@ -15,6 +15,7 @@ START_MARKER = "LinkedIn Corporation ©"
 END_MARKERS = (
     "See how you compare to",               # 3+ applicants (Easy Apply and external apply)
     "Once there are 3 or more applicants",  # fewer than 3 applicants: no comparison yet
+    "Once there are 3 or more candidates for this job",  # same layout, other wording
 )
 
 # Strong-match messages LinkedIn shows on the open posting. The search skips "You’d" because

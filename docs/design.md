@@ -234,6 +234,7 @@ company insights, footer). The open posting always sits between two markers. See
   - External apply ("Responses managed off LinkedIn"): `See how you compare to others who clicked apply`
   - Fewer than 3 applicants: LinkedIn has no comparison yet and shows
     `Once there are 3 or more applicants for this job, we will show how you compare to the competition.`
+  - Same layout, other wording: `Once there are 3 or more candidates for this job, we will show how you compare to the competition.`
   - `trim.py` keeps them in a table (`END_MARKERS`) and cuts at the first one it finds. A shorter
     common substring (`how you compare to`) was rejected: it leaves `See ` at the end of every
     posting and, being a common phrase, raises the risk of a silent cut inside a description.

@@ -101,3 +101,8 @@ def test_long_page_without_url_does_not_take_id_from_side_list():
 ])
 def test_is_top_applicant(text, expected):
     assert is_top_applicant(text) == expected
+
+
+def test_fewer_than_3_candidates_variant():
+    text = "menu\nLinkedIn Corporation © 2026\nPOSTING\nOnce there are 3 or more candidates for this job, we will show how you compare to the competition.\nfooter"
+    assert trim_page(text) == "POSTING\n"
