@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from job_analyzer.trim import UrlInfo, extract_url_info, trim_page
+from job_analyzer.trim import UrlInfo, extract_url_info, trim_page, is_top_applicant
 
 FIXTURES = Path(__file__).parent / "fixtures"
 # .glob("**/*.txt") lists matching files in this folder and its subfolders, so real
@@ -92,3 +92,12 @@ def test_bare_link_without_url_line():
 def test_long_page_without_url_does_not_take_id_from_side_list():
     text = "x" * 600 + " https://www.linkedin.com/jobs/view/111/ "
     assert extract_url_info(text).job_id is None
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("You’d be a top applicant", True),
+    ("Job match is high, we can help you stand out", True),
+    ("", False),
+])
+def test_is_top_applicant(text, expected):
+    assert is_top_applicant(text) == expected

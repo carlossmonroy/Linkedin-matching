@@ -17,6 +17,13 @@ END_MARKERS = (
     "Once there are 3 or more applicants",  # fewer than 3 applicants: no comparison yet
 )
 
+# Strong-match messages LinkedIn shows on the open posting. The search skips "You’d" because
+# LinkedIn writes it with a curly apostrophe. Search only the trimmed text: the side list repeats them.
+TOP_APPLICANT_TEXTS = (
+    "be a top applicant",
+    "Job match is high",
+)
+
 # re.compile() parses the pattern once, at import time, and it is reused on every call.
 # r"..." is a *raw string*: backslashes reach the regex as-is instead of being treated
 # as Python escape sequences.
@@ -55,6 +62,11 @@ def trim_page(text: str) -> str:
     # `a` is one past the first line break after the marker, so the rest of that line
     # ("LinkedIn Corporation © 2026") is dropped too.
     return text[text.find("\n", start) + 1 : end]
+
+
+def is_top_applicant(text: str) -> bool:
+    """True if the trimmed posting shows one of LinkedIn's strong-match messages."""
+    return any(phrase in text for phrase in TOP_APPLICANT_TEXTS)
 
 
 def extract_url_info(text: str) -> UrlInfo:

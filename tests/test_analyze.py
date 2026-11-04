@@ -94,3 +94,24 @@ def test_main_without_criteria_fails(monkeypatch, capsys, tmp_path):
     monkeypatch.setattr(mod, "CRITERIA", tmp_path / "criteria.md")
     assert mod.main([CAPTURE]) == 1
     assert "criteria.md not found" in capsys.readouterr().err
+
+
+def test_top_applicant_is_added_when_claude_misses_it():
+    text = "menu\nLinkedIn Corporation © 2026\nYou’d be a top applicant\nSee how you compare to x\nfooter"
+    resp = SimpleNamespace(stop_reason="end_turn", parsed_output=posting(linkedin_signals=[]))
+    result = mod.analyze(text, client=FakeClient(resp), criteria_path=mod.CRITERIA_EXAMPLE)
+    assert "top_applicant" in result.linkedin_signals
+
+
+def test_top_applicant_is_in_the_side_list_is_ignored():
+    text = "You’d be a top applicant\nLinkedIn Corporation © 2026\nPOSTING\nSee how you compare to x\nfooter"
+    resp = SimpleNamespace(stop_reason="end_turn", parsed_output=posting(linkedin_signals=[]))
+    result = mod.analyze(text, client=FakeClient(resp), criteria_path=mod.CRITERIA_EXAMPLE)
+    assert "top_applicant" not in result.linkedin_signals
+
+
+def test_top_applicant_is_already_in_the_signals_is_ignored():
+    text = "menu\nLinkedIn Corporation © 2026\nYou’d be a top applicant\nSee how you compare to x\nfooter"
+    resp = SimpleNamespace(stop_reason="end_turn", parsed_output=posting(linkedin_signals=["top_applicant"]))
+    result = mod.analyze(text, client=FakeClient(resp), criteria_path=mod.CRITERIA_EXAMPLE)
+    assert result.linkedin_signals.count("top_applicant") == 1

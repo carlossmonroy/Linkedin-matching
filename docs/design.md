@@ -287,6 +287,10 @@ def priority(p, days, location=None):
 
 - LinkedIn signals are a closed list (`Signal` literal), so the ranking never compares against
   free text returned by the LLM.
+- `top_applicant` weighs more than one point of `technical_match`, and Claude missed it once on a
+  real capture. Python also looks for it in the trimmed text with a plain search and adds it if
+  missing. "Job match is high" counts as well: it is assumed to be correlated, based on a single
+  capture so far, and it is easy to remove if the data says otherwise.
 
 **Posting age:** newer weighs more. Applying in the first days makes it likelier that a human
 reads the CV.

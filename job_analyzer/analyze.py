@@ -14,7 +14,7 @@ from pathlib import Path       # file paths as objects (same code on Windows and
 from job_analyzer.models import JobPosting
 from job_analyzer.ranking import days_since_posted, priority
 from job_analyzer.rules import InvalidPosting, initial_status, validate_posting
-from job_analyzer.trim import extract_url_info, trim_page
+from job_analyzer.trim import extract_url_info, is_top_applicant, trim_page
 
 MODEL = "claude-sonnet-5-5"
 # __file__ = path of this file (…/job_analyzer/analyze.py).
@@ -73,6 +73,7 @@ def analyze(text: str, model: str = MODEL, client=None, criteria_path: Path = CR
     from anthropic import Anthropic
 
     client = client or Anthropic()        # Anthropic() reads ANTHROPIC_API_KEY from the environment
+    trimmed = trim_page(text)                   # remove menus, side lists, footers, etc.
     resp = client.beta.messages.parse(
         model=model,
         max_tokens=16000,
@@ -81,7 +82,7 @@ def analyze(text: str, model: str = MODEL, client=None, criteria_path: Path = CR
         # not apply (nothing breaks, it just saves nothing).
         system=[{"type": "text", "text": system_prompt(criteria_path), "cache_control": {"type": "ephemeral"}}],
         # The conversation: a single user message with the already-trimmed posting.
-        messages=[{"role": "user", "content": trim_page(text)}],
+        messages=[{"role": "user", "content": trimmed}],
         # The SDK turns JobPosting into a JSON Schema and, on the way back, the JSON into a JobPosting.
         output_format=JobPosting,
         # effort: how much the model reasons. medium is enough for data extraction.
@@ -100,6 +101,9 @@ def analyze(text: str, model: str = MODEL, client=None, criteria_path: Path = CR
         raise AnalysisError(f"No job card returned (stop_reason={resp.stop_reason})")
 
     posting = resp.parsed_output          # already a JobPosting validated by Pydantic
+    if is_top_applicant(trimmed) and "top_applicant" not in posting.linkedin_signals:
+        # The model may miss the "top applicant" signal even if it is in the text. Add it.
+        posting.linkedin_signals.append("top_applicant")
     validate_posting(posting)             # 1–5 ranges (raises InvalidPosting otherwise)
     return posting
 
