@@ -84,6 +84,11 @@ def analyze(text: str, model: str = MODEL, client=None, criteria_path: Path = CR
 
     client = client or Anthropic()        # Anthropic() reads ANTHROPIC_API_KEY from the environment
     trimmed = trim_page(text)                   # remove menus, side lists, footers, etc.
+    # trim_page() returns the full text when a marker is missing. Sending that would cost more
+    # tokens and let the side list fake signals such as top_applicant.
+    if trimmed == text:
+        raise AnalysisError("Text does not contain LinkedIn markers")
+
     resp = client.beta.messages.parse(
         model=model,
         max_tokens=16000,

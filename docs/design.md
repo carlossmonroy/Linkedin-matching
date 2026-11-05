@@ -242,8 +242,9 @@ company insights, footer). The open posting always sits between two markers. See
     posting and, being a common phrase, raises the risk of a silent cut inside a description.
 - On the real samples it kept only **29–49%** of the text (about 2/3 fewer tokens).
 - It also removes the signed-in user's name, which appears at the bottom of the page.
-- The markers depend on the LinkedIn UI language (English). The fallback (return the full text)
-  guarantees it does not break.
+- The markers depend on the LinkedIn UI language (English). If one is missing, `trim_page()`
+  returns the full text and `analyze()` stops without calling the API: the whole page would cost
+  more tokens and its side list could fake signals such as `top_applicant`.
 
 ### 5.3 Analysis with Claude: structured output — implemented
 

@@ -28,7 +28,10 @@ class FakeClient:
         return self.resp
 
 
-def run(resp, text="text"):
+TRIMMABLE = "LinkedIn Corporation © 2026\nPOSTING\nSee how you compare to x"
+
+
+def run(resp, text=TRIMMABLE):
     # The public example profile is used so the tests never depend on your private criteria.md.
     client = FakeClient(resp)
     mod.analyze(text, client=client, criteria_path=mod.CRITERIA_EXAMPLE)
@@ -50,6 +53,13 @@ def test_call_uses_trimmed_text_cache_and_schema():
 def test_abnormal_stop_reason(stop_reason):
     with pytest.raises(mod.AnalysisError):
         run(SimpleNamespace(stop_reason=stop_reason, stop_details=None, parsed_output=None))
+
+
+def test_page_without_markers_is_not_sent_to_the_api():
+    client = FakeClient(SimpleNamespace(stop_reason="end_turn", parsed_output=posting()))
+    with pytest.raises(mod.AnalysisError):
+        mod.analyze("A posting without LinkedIn's markers.", client=client, criteria_path=mod.CRITERIA_EXAMPLE)
+    assert client.kwargs is None   # the API was never called
 
 
 def test_out_of_range_score_is_rejected():

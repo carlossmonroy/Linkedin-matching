@@ -55,8 +55,8 @@ def trim_page(text: str) -> str:
         end = text.find(marker)
         if end != -1:
             break
-    # Fallback: if LinkedIn changes its layout or UI language, sending everything
-    # (more tokens) is better than losing the posting.
+    # If LinkedIn changes its layout or UI language, the text comes back untouched.
+    # analyze() treats that as an error and does not call the API.
     if start == -1 or end == -1 or end < start:
         return text
     # Slicing: text[a:b] is the characters from a up to b-1.

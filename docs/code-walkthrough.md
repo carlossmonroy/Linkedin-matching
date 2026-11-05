@@ -190,7 +190,7 @@ on its own.
 
 | Function | Input | Output | What it does |
 |---|---|---|---|
-| `trim_page(text)` | raw text | trimmed text | Keeps what lies between `LinkedIn Corporation ©` and the first end marker found in `END_MARKERS` (one per LinkedIn layout). If a marker is missing, it returns everything (fallback). |
+| `trim_page(text)` | raw text | trimmed text | Keeps what lies between `LinkedIn Corporation ©` and the first end marker found in `END_MARKERS` (one per LinkedIn layout). If a marker is missing, it returns everything, and `analyze()` stops without calling the API. |
 | `is_top_applicant(text)` | trimmed text | `bool` | Looks for LinkedIn's strong-match messages with a plain text search. `analyze()` adds the `top_applicant` signal if Claude missed it. |
 | `extract_url_info(text)` | raw text | `UrlInfo` | Finds the `URL:` line added by F9 and extracts the job ID and the `keywords` parameter. |
 
